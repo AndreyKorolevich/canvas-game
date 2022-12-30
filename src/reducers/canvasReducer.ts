@@ -2,34 +2,32 @@ import { CanvasActionTypes } from '../actions/canvasAction'
 import {
   ENEMY_TYPE_SPINNING,
   ENEMY_TYPE_SPINNING_TRACKING,
-  ENEMY_TYPE_STATIC, ENEMY_TYPE_TRACKING,
-  PLAYER_SIZE,
-  xCenter,
-  yCenter
+  ENEMY_TYPE_STATIC,
+  ENEMY_TYPE_TRACKING
 } from '../game/constants'
+import { PointType } from '../components/Points/Point'
 
 export const SET_MOUSE_POSITION = 'SET_MOUSE_POSITION'
 export const INCREASE_SCORE = 'INCREASE_SCORE'
 export const SHOW_FINAL_MODAL = 'SHOW_FINAL_MODAL'
+export const HIDE_START_MODAL = 'HIDE_START_MODAL'
 export const START_NEW_GAME = 'START_NEW_GAME'
 export const INCREASE_GAME_NUMBER = 'INCREASE_GAME_NUMBER'
-export const ADD_ENEMY = 'ADD_ENEMY'
-export const ADD_PARTICLES = 'ADD_PARTICLES'
-export const ADD_PROJECTILE = 'ADD_PROJECTILE'
-export const REMOVE_ENEMY = 'REMOVE_ENEMY'
-export const REMOVE_PARTICLES = 'REMOVE_PARTICLES'
-export const REMOVE_PROJECTILE = 'REMOVE_PROJECTILE'
-export const UPDATE_ENEMY_POSITION = 'UPDATE_ENEMY_POSITION'
-export const UPDATE_PARTICLE_POSITION = 'UPDATE_PARTICLE_POSITION'
-export const UPDATE_PROJECTILE_POSITION = 'UPDATE_PROJECTILE_POSITION'
-export const SHRINK_ENEMY = 'SHRINK_ENEMY'
 export const SET_REFRESH_RATE_MONITOR = 'SET_REFRESH_RATE_MONITOR'
+export const ADD_POINT = 'ADD_POINT'
+export const DELETE_POINT = 'DELETE_POINT'
+export const UPDATE_POINT_POSITIONS = 'UPDATE_POINT_POSITIONS'
+export const UPDATE_COLOR_LAST_KILLED_ENEMY = 'UPDATE_COLOR_LAST_KILLED_ENEMY'
 
 export interface GameObjectInterface {
   x: number
   y: number
   radius: number
   color: string
+  velocity: {
+    x: number,
+    y: number
+  }
 }
 
 export type EnemyType = typeof ENEMY_TYPE_STATIC |
@@ -38,31 +36,26 @@ export type EnemyType = typeof ENEMY_TYPE_STATIC |
   typeof ENEMY_TYPE_SPINNING_TRACKING
 
 export interface ParticleInterface extends GameObjectInterface {
-  velocity: {
-    x: number,
-    y: number
-  }
   alpha: number
   gravity: number
   friction: number
 }
 
-export interface ProjectileInterface extends GameObjectInterface {
-  velocity: {
-    x: number,
-    y: number
-  }
-}
+export type ProjectileInterface = GameObjectInterface
 
 export interface EnemyInterface extends GameObjectInterface {
   type: EnemyType
   speed: number,
   spin: number
   radians: number
-  velocity: {
-    x: number,
-    y: number
-  }
+}
+
+export interface BonusInterface extends GameObjectInterface {
+  borderColor: string
+  spikes: number
+  innerRadius: number
+  borderWidth: number
+  time: number
 }
 
 export type CanvasStateType = {
@@ -72,8 +65,11 @@ export type CanvasStateType = {
   },
   score: number
   isShowFinalModal: boolean
+  isShowStartModal: boolean
   gameNumber: number
   refreshRateMonitor: number
+  points: Array<PointType>
+  colorLastKilledEnemy: string
 }
 
 const initialState = {
@@ -83,9 +79,11 @@ const initialState = {
   },
   score: 0,
   isShowFinalModal: false,
+  isShowStartModal: true,
   gameNumber: 0,
-
-  refreshRateMonitor: 0
+  refreshRateMonitor: 0,
+  points: [],
+  colorLastKilledEnemy: 'rgba(44.0, 29.0, 108.0, 1)'
 }
 
 export default (state: CanvasStateType = initialState, action: CanvasActionTypes) => {
@@ -102,7 +100,7 @@ export default (state: CanvasStateType = initialState, action: CanvasActionTypes
     case INCREASE_SCORE: {
       return {
         ...state,
-        score: state.score + 10
+        score: state.score + action.payload.count
       }
     }
     case SET_REFRESH_RATE_MONITOR: {
@@ -117,20 +115,57 @@ export default (state: CanvasStateType = initialState, action: CanvasActionTypes
         isShowFinalModal: true
       }
     }
+    case HIDE_START_MODAL: {
+      return {
+        ...state,
+        isShowStartModal: false
+      }
+    }
     case START_NEW_GAME: {
       return {
         ...state,
         score: 0,
         isShowFinalModal: false,
-        projectiles: [],
-        enemies: [],
-        particles: [],
+        points: []
       }
     }
     case INCREASE_GAME_NUMBER: {
       return {
         ...state,
         gameNumber: state.gameNumber + 1
+      }
+    }
+    case ADD_POINT: {
+      return {
+        ...state,
+        points: [...state.points, action.payload.point]
+      }
+    }
+    case UPDATE_COLOR_LAST_KILLED_ENEMY: {
+      return {
+        ...state,
+        colorLastKilledEnemy: action.payload.color
+      }
+    }
+    case DELETE_POINT: {
+      return {
+        ...state,
+        points: state.points.filter(point => point.id !== action.payload.id)
+      }
+    }
+    case UPDATE_POINT_POSITIONS: {
+      return {
+        ...state,
+        points: state.points.map(point => {
+          if (point.id === action.payload.id) {
+            return {
+              ...point,
+              top: point.top - 0.7,
+              opacity: point.opacity - 0.02
+            }
+          }
+          return point
+        })
       }
     }
     default:

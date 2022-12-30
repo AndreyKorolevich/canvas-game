@@ -1,10 +1,28 @@
-import { GameObject, GameObjectInterface } from './GameObject'
+export interface PlayerInterface {
+  x: number
+  y: number
+  radius: number
+  ctx: CanvasRenderingContext2D
+  color: string
+  draw: () => void
+  update: () => void
+  machineGunMode: boolean
+}
 
-export type PlayerInterface = GameObjectInterface
-
-export class Player extends GameObject {
+export class Player  {
+  x: number
+  y: number
+  radius: number
+  ctx: CanvasRenderingContext2D
+  color: string
+  machineGunMode: boolean
   constructor(x: number, y: number, radius: number, color: string, ctx: CanvasRenderingContext2D) {
-    super(x, y, radius, color, ctx)
+    this.x = x
+    this.y = y
+    this.radius = radius
+    this.ctx = ctx
+    this.color = color
+    this.machineGunMode = false
   }
 
   draw() {
