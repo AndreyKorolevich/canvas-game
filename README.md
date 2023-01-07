@@ -9,8 +9,10 @@ Deploy: https://easy-peasy-game.netlify.app
 
 This is simple game shows the basics principles of creating a game using such technology as a Canvas, JS, React.
 
-Moving: 'W', 'S', 'A', 'D'
-Shooting: Left click
+##### Moving: 'W', 'S', 'A', 'D'
+##### Shooting: Left click
+##### Machinegun mode: Catch blue Star and hold left click
+
 #### `npm run instal`
 #### `npm start`
 
